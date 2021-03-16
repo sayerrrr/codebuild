@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Publish Docker Image to Docker Hub
           command: |
-            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 446481105531.dkr.ecr.us-east-1.amazonaws.com
+            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 446481105531.dkr.ecr.us-east-2.amazonaws.com
             docker tag staging-resource-api:latest 446481105531.dkr.ecr.us-east-2.amazonaws.com/staging-resource-api:latest
             docker push 446481105531.dkr.ecr.us-east-2.amazonaws.com/staging-resource-api:latest
 workflows:
