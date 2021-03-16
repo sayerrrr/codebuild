@@ -1,0 +1,130 @@
+generator prisma_client_js {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_DEV")
+}
+
+model User {
+  id                  String             @id @default(cuid())
+  email               String             @unique
+  firstName           String?
+  lastName            String?
+  password            String
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  role                Role               @default(USER)
+  avatarUrl           String?
+  lastLogin           DateTime?
+  resetPasswordToken  String
+  resetPasswordExpiry DateTime?
+  validateEmailToken  String
+  isEmailValidated    Boolean
+  business            Business[]
+  requestedCategories String[]
+  isAdmin             Boolean            @default(false)
+  isDisabled          Boolean            @default(false)
+  OfferingCategory    OfferingCategory[]
+}
+
+model Transaction {
+  id          String    @id @default(cuid())
+  recipient   Business  @relation("recipient", fields: [recipientId], references: [id])
+  recipientId String
+  sender      Business  @relation("sender", fields: [senderId], references: [id])
+  senderId    String
+  amount      Decimal
+  createdAt   DateTime  @default(now())
+  order       Order[]
+  Offering    Offering? @relation("offering", fields: [offeringId], references: [id])
+  offeringId  String?
+}
+
+model Business {
+  id            String        @id @default(cuid())
+  description   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  ownerId       String
+  owner         User          @relation(fields: [ownerId], references: [id])
+  address       String?
+  offerings     Offering[]
+  name          String
+  email         String?
+  tagline       String?
+  logoUrl       String?
+  coverUrl      String?
+  socialLinks   String[]
+  externalLinks String[]
+  phoneNumber   String?
+  creditAmount  Int
+  creditScore   Int
+  approved      Boolean       @default(false)
+  handle        String        @unique
+  isDisabled    Boolean       @default(false)
+  recipient     Transaction[] @relation("recipient")
+  sender        Transaction[] @relation("sender")
+}
+
+model Offering {
+  id           String             @id @default(cuid())
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  business     Business           @relation(fields: [businessId], references: [id])
+  businessId   String
+  cost         Decimal            @default(0)
+  address      String?
+  imageUrl     String?
+  videoUrl     String?
+  description  String?
+  title        String?
+  isDisabled   Boolean            @default(false)
+  categories   OfferingCategory[]
+  transactions Transaction[]      @relation("offering")
+  orders       Order[]            @relation("orders")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  Offering      Offering    @relation("orders", fields: [offeringId], references: [id])
+  offeringId    String
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  quantity      Int
+  amount        Decimal     @default(0)
+  note          String
+  state         OrderState  @default(PENDING)
+}
+
+model OfferingCategory {
+  id         String    @id @default(cuid())
+  category   String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+  Offering   Offering? @relation(fields: [offeringId], references: [id])
+  offeringId String?
+}
+
+model InviteCode {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  createdAt  DateTime  @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderState {
+  PAID
+  REFUNDED
+  PENDING
+}
+

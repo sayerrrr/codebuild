@@ -1,0 +1,37 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t staging-resource-api:latest .
+  publish-latest:
+    environment:
+      IMAGE_NAME: building-on-ci
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - setup_remote_docker
+      - run: sudo apt-get update && sudo apt-get install -y python-dev
+      - run: sudo curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py
+      - run: sudo python get-pip.py
+      - run: sudo pip install awscli --upgrade
+      - run: aws --version
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 446481105531.dkr.ecr.us-east-1.amazonaws.com
+            docker tag staging-resource-api:latest 446481105531.dkr.ecr.us-east-2.amazonaws.com/staging-resource-api:latest
+            docker push 446481105531.dkr.ecr.us-east-2.amazonaws.com/staging-resource-api:latest
+workflows:
+  version: 2
+  build-master:
+    jobs:
+      - build:
+      - publish-latest:
+          requires:
+            - build

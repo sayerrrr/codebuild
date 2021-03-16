@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Offering" ALTER COLUMN "cost" SET DEFAULT 0,
+ALTER COLUMN "cost" SET DATA TYPE DECIMAL(65,30);
+
+-- AlterTable
+ALTER TABLE "Transaction" ALTER COLUMN "amount" SET DATA TYPE DECIMAL(65,30);
