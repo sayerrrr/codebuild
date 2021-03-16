@@ -2,10 +2,11 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/buildpack-deps:stretch
+      - image: cimg/node:14.16.0
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+        version: 19.03.13
       - run:
           name: Build Docker image
           command: docker build -t staging-resource-api:latest .
@@ -15,7 +16,8 @@ jobs:
     docker:
       - image: circleci/buildpack-deps:stretch
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+        version: 19.03.13
       - run: sudo apt-get update && sudo apt-get install -y python-dev
       - run: sudo curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py
       - run: sudo python get-pip.py
